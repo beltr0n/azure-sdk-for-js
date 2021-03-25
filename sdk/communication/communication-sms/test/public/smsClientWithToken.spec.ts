@@ -2,15 +2,14 @@
 // Licensed under the MIT license.
 
 import { env, isPlaybackMode, record, Recorder } from "@azure/test-utils-recorder";
-import { SmsSendRequest, SmsClient } from "../src/smsClient";
+import { SmsSendRequest, SmsClient } from "../../src/smsClient";
 import { assert } from "chai";
 import { isNode } from "@azure/core-http";
 import * as dotenv from "dotenv";
 import * as sinon from "sinon";
 import { parseConnectionString } from "@azure/communication-common";
-import { createCredential, recorderConfiguration } from "./utils/recordedClient";
-import { Uuid } from "../src/utils/uuid";
-import { Context } from "mocha";
+import { createCredential, recorderConfiguration } from "../utils/recordedClient";
+import { Uuid } from "../../src/utils/uuid";
 
 if (isNode) {
   dotenv.config();
@@ -19,15 +18,16 @@ if (isNode) {
 describe("SmsClientWithToken [Playback/Live]", async () => {
   let recorder: Recorder;
 
-  beforeEach(async function(this: Context) {
+  beforeEach(async function() {
     recorder = record(this, recorderConfiguration);
+    recorder.skip("browser", "DefaultAzureCredential not supported in browser");
     if (isPlaybackMode()) {
       sinon.stub(Uuid, "generateUuid").returns("sanitized");
       sinon.stub(Date, "now").returns(0);
     }
   });
 
-  afterEach(async function(this: Context) {
+  afterEach(async function() {
     if (!this.currentTest?.isPending()) {
       await recorder.stop();
     }
@@ -36,7 +36,7 @@ describe("SmsClientWithToken [Playback/Live]", async () => {
     }
   });
 
-  it("can send an SMS when url and token credential are provided", async function(this: Context) {
+  it("can send an SMS when url and token credential are provided", async function() {
     const credential = createCredential();
 
     if (!credential) {

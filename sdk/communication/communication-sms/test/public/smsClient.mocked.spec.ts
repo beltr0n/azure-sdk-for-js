@@ -9,17 +9,20 @@ import {
   isNode
 } from "@azure/core-http";
 
-import { Uuid } from "../src/utils/uuid";
-import { generateSendMessageRequest } from "../src/utils/smsUtils";
+import { generateSendMessageRequest } from "../../src/utils/smsUtils";
 
 import { AzureKeyCredential } from "@azure/core-auth";
 import { assert } from "chai";
 import sinon from "sinon";
-import { apiVersion } from "../src/generated/src/models/parameters";
-import { SmsClient, SmsSendRequest } from "../src/smsClient";
+import { apiVersion } from "../../src/generated/src/models/parameters";
+import { SmsClient, SmsSendRequest } from "../../src/smsClient";
 
 const API_VERSION = apiVersion.mapper.defaultValue;
 const TEST_NUMBER = "+14255550123";
+
+const validateJsonResult = (expected:Object, actual:Object, exclude:string[]) => {
+  Object.keys(expected) === Object.keys(actual);
+}
 
 describe("[mocked] SmsClient", async () => {
   const baseUri = "https://contoso.api.fake:443";
@@ -48,7 +51,6 @@ describe("[mocked] SmsClient", async () => {
       };
     }
   };
-  const mockedGuid = "42bf408f-1931-4314-8971-2b538625a2b0";
 
   const testSendRequest: SmsSendRequest = {
     from: TEST_NUMBER,
@@ -67,10 +69,7 @@ describe("[mocked] SmsClient", async () => {
   describe("when sending an SMS", () => {
     let smsClient: SmsClient;
     beforeEach(() => {
-      uuidStub = sinon.stub(Uuid, "generateUuid");
-      uuidStub.returns(mockedGuid);
       sendRequestSpy = sinon.spy(mockHttpClient, "sendRequest");
-      sinon.useFakeTimers();
       smsClient = new SmsClient(connectionString, { httpClient: mockHttpClient });
     });
 
